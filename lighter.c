@@ -144,14 +144,16 @@ static void checker_scene (struct fb *fb)
 static void tangent_scene (struct fb *fb)
 {
   unsigned long x;
+  relative x_scale = SUP_ANGLE / fb->w;
+  relative y_scale = SUP_EASY / (fb->h / 2);
   /*  static e43 tangent_model;
   g_model = &tangent_model;
   e43_identity(g_model); */
   fb_clear(fb);
-  fb_move_to(fb, 0, fb->h / 2);
+  fb_move_to(fb, (s_xy){0, fb->h / 2});
   for (x = 0; x < fb->w; x++) {
-    unsigned_long y = fb->h / 2 + e_tangent(x) / (EASY_ONE / fb->h);
-    fb_line_to(fb, x, y);
+    unsigned long y = fb->h / 2 + e_tangent(x * x_scale) / y_scale;
+    fb_line_to(fb, (s_xy){x, y});
   }
 }
 
@@ -161,13 +163,12 @@ static void draw (struct fb *fb)
   fb_swap(fb);
 }
 
-#define BUFFER_SIZE (1400 * 1050 * 4)
+#define BUFFER_SIZE (1400 * 1050 * 5)
 
 int main ()
 {
   struct fb fb;
   s_rgba back[BUFFER_SIZE / 4];
-  sin_table();
   if (fb_open(&fb, "/dev/fb0", back, BUFFER_SIZE))
     return 1;
   while (g_loop) {
